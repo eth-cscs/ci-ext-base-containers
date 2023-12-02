@@ -15,45 +15,6 @@ ROCM_EXTERNAL_DEF=""
 ROCM_ARCH=""
 CUDA_ARCH=""
 
-# TODO Remove this when hohgant is shut down
-# Target aliases: print warning
-COLOR_DEFAULT='\033[0m'
-COLOR_YELLOW='\033[0;33m'
-COLOR_YELLOW_BOLD='\033[1;33m'
-COLOR_RED='\033[0;31m'
-COLOR_RED_BOLD='\033[1;31m'
-
-TEMPLATE="${COLOR_YELLOW_BOLD}Warning: the target ${COLOR_RED_BOLD}OLD${COLOR_YELLOW_BOLD} is deprecated and will be removed soon, please use ${COLOR_RED_BOLD}NEW${COLOR_YELLOW_BOLD} instead!!!${COLOR_DEFAULT}"
-
-OLD=""
-NEW=""
-case $TARGET_MACHINE in
-    hohgant-cpu)
-        OLD="hohgant-cpu"
-        NEW="alps-zen2"
-        TARGET_MACHINE="alps-zen2"
-        ;;
-    hohgant-nvgpu)
-        OLD="hohgant-nvgpu"
-        NEW="alps-a100"
-        TARGET_MACHINE="alps-a100"
-        ;;
-    hohgant-amdgpu)
-        OLD="hohgant-amdgpu"
-        NEW="alps-mi200"
-        TARGET_MACHINE="alps-mi200"
-        ;;
-    *)
-        ;;
-esac
-
-if [ -n "$OLD" ]; then
-    WARNING=${TEMPLATE/OLD/$OLD}
-    WARNING=${WARNING/NEW/$NEW}
-    echo -e $WARNING
-fi
-#TODO end remove
-
 CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
 ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
 llvm-amdgpu:
