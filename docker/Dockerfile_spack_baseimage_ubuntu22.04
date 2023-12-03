@@ -74,5 +74,8 @@ ENV ALSO_CUDA_VERSION=$CUDA_VERSION
 ARG ROCM_VERSION=5.7
 ENV ROCM_VERSION=$ROCM_VERSION
 
+# Workaround for NVIDIA driver mismatch
+ENV NVIDIA_DISABLE_REQUIRE=true
+
 ENTRYPOINT ["/bin/bash", "/opt/spack/share/spack/docker/entrypoint.bash"]
 CMD ["interactive-shell"]
