@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Steps in this module:
+# - Process target architecture
+
+# cuda compute capability:
+# P100 = 6.0
+# A100 = 8.0
+# H100 = 9.0
+
+TARGET_MACHINE=$1
+POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
+DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
+CUDA_EXTERNAL_DEF=""
+ROCM_EXTERNAL_DEF=""
+ROCM_ARCH=""
+CUDA_ARCH=""
+
+CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
+ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
+llvm-amdgpu:
+      externals:
+      - spec: llvm-amdgpu@${ROCM_VERSION} ~rocm-device-libs
+        prefix: /opt/rocm-${ROCM_VERSION}/llvm
+      buildable: false
+    rocm-device-libs:
+      externals:
+      - spec: rocm-device-libs@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    hip:
+      externals:
+      - spec: hip@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocblas:
+      externals:
+      - spec: rocblas@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocsolver:
+      externals:
+      - spec: rocsolver@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocprim:
+      externals:
+      - spec: rocprim@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocthrust:
+      externals:
+      - spec: rocthrust@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    hsa-rocr-dev:
+      externals:
+      - spec: hsa-rocr-dev@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+EOF
+)
+
+case $TARGET_MACHINE in
+    daint-gpu)
+        CUDA_ARCH="60"
+        DEFAULT_VARIANTS="${DEFAULT_VARIANTS} cuda_arch=${CUDA_ARCH} +cuda"
+        CUDA_EXTERNAL_DEF=${CUDA_EXTERNAL_DEF_TEMPLATE}
+        TARGET="haswell"
+        ;;
+    daint-mc)
+        TARGET="broadwell"
+        ;;
+    alps-zen2)
+        TARGET="zen2" # AMD EPYC 7742 64-Core Processor
+        ;;
+    alps-a100)
+        CUDA_ARCH="80"
+        DEFAULT_VARIANTS="${DEFAULT_VARIANTS} cuda_arch=${CUDA_ARCH} +cuda" # NVIDIA A100-SXM4-80GB
+        CUDA_EXTERNAL_DEF=${CUDA_EXTERNAL_DEF_TEMPLATE}
+        TARGET="zen3" # AMD EPYC 7713 64-Core Processor
+        ;;
+    alps-mi200)
+        DEFAULT_VARIANTS="${DEFAULT_VARIANTS} amdgpu_target=gfx90a:xnack- +rocm" # gfx90a (amdgcn-amd-amdhsa--gfx90a:sramecc+:xnack-)
+        ROCM_EXTERNAL_DEF=${ROCM_EXTERNAL_DEF_TEMPLATE}
+        ROCM_ARCH="gfx90a"
+        TARGET="zen3" # TODO AMD EPYC 7A53 64-Core Processor # TODO is it 7A53 or 7453?
+        ;;
+    alps-gh200)
+        #TODO
+        ;;
+    alps-mi300a)
+        #TODO
+        ;;
+    *)
+        echo "The first argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
+        exit 1
+        ;;
+esac
+shift
+
+
+# at this point the rest of the arguments are supposed to be valid spack sepcs
+
+if [[ -z "${TARGET}" ]] ; then
+    echo "There is a bug in $0, because TARGET is empty"
+    exit 1
+fi

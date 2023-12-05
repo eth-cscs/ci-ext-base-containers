@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Steps in this module:
+# - Create and configure environment
+
+mkdir /opt/spack-environment
+
+cat - > /dev/shm/enforce_microarchitecture.yaml << EOF
+packages:
+  all:
+    require: target=$TARGET
+  mpi:
+    require: 'mpich@3.1.4 netmod=tcp device=ch3'
+EOF
+
+env DEFAULT_VARIANTS="$DEFAULT_VARIANTS" \
+    CUDA_EXTERNAL_DEF="$CUDA_EXTERNAL_DEF" \
+    ROCM_EXTERNAL_DEF="$ROCM_EXTERNAL_DEF" \
+    python3 -c 'import os,sys; sys.stdout.write(os.path.expandvars(sys.stdin.read()))' <  /opt/spack_env.yaml.template > /opt/spack-environment/spack.yaml
+
+spack -e /opt/spack-environment config add -f /dev/shm/enforce_microarchitecture.yaml
+if [[ -n ${NUM_PROCS} ]] ; then
+    spack config add config:build_jobs:${NUM_PROCS}
+else
+    echo "WARNING: NUM_PROCS is an empty variable. This is not the usual case, and it should be set to the number of processes that you want to use for building the spack software stack."
+fi

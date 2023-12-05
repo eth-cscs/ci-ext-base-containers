@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Steps in this module:
+# - Postprocessing
+# - Automatically activate the environment
+
+# Strip all the binaries
+find -L /opt/view/* -type f -exec readlink -f '{}' \; | \
+    xargs file -i | \
+    grep 'charset=binary' | \
+    grep 'x-executable\|x-archive\|x-sharedlib' | \
+    awk -F: '{print $1}' | xargs strip -s || true
+
+# Modifications to the environment that are necessary to run
+cd /opt/spack-environment
+spack env activate --sh -d . >> /etc/profile.d/z10_spack_environment.sh
+echo 'export CPATH=/opt/view/include:$CPATH' >> /etc/profile.d/z10_spack_environment.sh
+if [ -n "$CUDA_ARCH" ]; then
+    NVCC_PREPEND_FLAGS="\"-arch=sm_${CUDA_ARCH}\""
+
+    echo "" >> /etc/profile.d/z10_spack_environment.sh
+    echo "# Add nvcc compile flags" >> /etc/profile.d/z10_spack_environment.sh
+    echo "export NVCC_PREPEND_FLAGS=${NVCC_PREPEND_FLAGS}" >> /etc/profile.d/z10_spack_environment.sh
+fi
+if [ -n "$ROCM_ARCH" ]; then
+    HIPCC_COMPILE_FLAGS_APPEND="\"--offload-arch=${ROCM_ARCH}\""
+
+    echo "" >> /etc/profile.d/z10_spack_environment.sh
+    echo "# Add hipcc compile flags" >> /etc/profile.d/z10_spack_environment.sh
+    echo "export HIPCC_COMPILE_FLAGS_APPEND=${HIPCC_COMPILE_FLAGS_APPEND}" >> /etc/profile.d/z10_spack_environment.sh
+fi

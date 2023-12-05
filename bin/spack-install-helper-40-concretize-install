@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Steps in this module:
+# - Concretize the environment
+# - Install all specs
+
+echo "Using spack environment yaml config:"
+cat /opt/spack-environment/spack.yaml
+
+cd /opt/spack-environment
+spack -e . gpg trust /tmp/spack_sign_key.gpg || echo 'Warning: Could not add spack sign key, i.e. your packages cannot be added to the buildcache'
+spack -e . concretize
+spack -e . env depfile | spack-modify-makefile-push-buildcache > Makefile
+make -j$NUM_PROCS SPACK_COLOR=always --output-sync=recurse
+spack -e . gc -y
