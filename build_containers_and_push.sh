@@ -34,17 +34,19 @@ for spackver in "v0.20.3" "v0.21.0" ; do
             echo_run podman push $CUDA_DOCKER_TAG
         done
 
-        # and for rocm base images
-        for rocmver in "5.6.1" "5.7" ; do
-            #rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-devel-${OS_DOCKER_TAG}
-            rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
-            ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}-$(uname -m)
-            ROCM_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-rocm${rocmver}-${OS_DOCKER_TAG}-$(uname -m)
-            echo_run podman build -f docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG} --format docker --build-arg BASEIMG=$rocm_baseimg --build-arg SPACK_VER=$spackver --build-arg ROCM_VERSION=$rocmver -t ${ROCM_DOCKER_TAG} .
-            echo_run podman build -f docker/Dockerfile_base_helper --format docker --build-arg BASEIMG=$rocm_baseimg -t ${ROCM_BASE_TAG_NAME} .
-            echo_run podman push $ROCM_BASE_TAG_NAME
-            echo_run podman push $ROCM_DOCKER_TAG
-        done
+        # and for rocm base images - only x86_64, aarch64 does not exist
+        if [[ $(uname -m) == "x86_64" ]] ; then
+            for rocmver in "5.6.1" "5.7" ; do
+                #rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-devel-${OS_DOCKER_TAG}
+                rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
+                ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
+                ROCM_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-rocm${rocmver}-${OS_DOCKER_TAG}
+                echo_run podman build -f docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG} --format docker --build-arg BASEIMG=$rocm_baseimg --build-arg SPACK_VER=$spackver --build-arg ROCM_VERSION=$rocmver -t ${ROCM_DOCKER_TAG} .
+                echo_run podman build -f docker/Dockerfile_base_helper --format docker --build-arg BASEIMG=$rocm_baseimg -t ${ROCM_BASE_TAG_NAME} .
+                echo_run podman push $ROCM_BASE_TAG_NAME
+                echo_run podman push $ROCM_DOCKER_TAG
+            done
+        fi
     done
 done
 
