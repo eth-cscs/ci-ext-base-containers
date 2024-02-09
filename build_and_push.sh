@@ -29,7 +29,8 @@ done
 
 shift $(( OPTIND - 1 ))
 
-if [[ "$1" != "image" && "$1" != "manifest" ]] ; then
+COMMAND="$1" ; shift
+if [[ "$COMMAND" != "image" && "$COMMAND" != "manifest" ]] ; then
     usage
 fi
 
@@ -60,10 +61,10 @@ for spackver in "v0.20.3" "v0.21.0" ; do
         OS_DOCKER_TAG=$(basename "$baseimg" | sed -e 's/://')
         DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-${OS_DOCKER_TAG}
         BASE_TAG_NAME=${REMOTE}/spack:base-${OS_DOCKER_TAG}
-        if [[ "$1" == "image" ]] ; then
+        if [[ "$COMMAND" == "image" ]] ; then
             build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$baseimg" "--build-arg SPACK_VER=$spackver"
             build_and_push_image "docker/Dockerfile_base_helper" "${BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$baseimg"
-        elif [[ "$1" == "manifest" ]] ; then
+        elif [[ "$COMMAND" == "manifest" ]] ; then
             build_and_push_manifest "$DOCKER_TAG" "$BASE_TAG_NAME"
         fi
 
@@ -72,10 +73,10 @@ for spackver in "v0.20.3" "v0.21.0" ; do
             cuda_baseimg=docker.io/nvidia/cuda:${cudaver}-devel-${OS_DOCKER_TAG}
             CUDA_BASE_TAG_NAME=${REMOTE}/spack:base-cuda${cudaver}-${OS_DOCKER_TAG}
             CUDA_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-cuda${cudaver}-${OS_DOCKER_TAG}
-            if [[ "$1" == "image" ]] ; then
+            if [[ "$COMMAND" == "image" ]] ; then
                 build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${CUDA_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg" "--build-arg SPACK_VER=$spackver"
                 build_and_push_image "docker/Dockerfile_base_helper" "${CUDA_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg"
-            elif [[ "$1" == "manifest" ]] ; then
+            elif [[ "$COMMAND" == "manifest" ]] ; then
                 build_and_push_manifest "$CUDA_DOCKER_TAG" "$CUDA_BASE_TAG_NAME"
             fi
         done
@@ -87,7 +88,7 @@ for spackver in "v0.20.3" "v0.21.0" ; do
                 rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
                 ROCM_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-rocm${rocmver}-${OS_DOCKER_TAG}
-                if [[ "$1" == "image" ]] ; then
+                if [[ "$COMMAND" == "image" ]] ; then
                     build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${ROCM_DOCKER_TAG}" "--build-arg BASEIMG=$rocm_baseimg" "--build-arg SPACK_VER=$spackver" "--build-arg ROCM_VERSION=$rocmver"
                     build_and_push_image "docker/Dockerfile_base_helper" "${ROCM_BASE_TAG_NAME}" "--build-arg BASEIMG=$rocm_baseimg"
                 fi
