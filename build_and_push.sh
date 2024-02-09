@@ -34,14 +34,14 @@ if [[ "$1" != "image" && "$1" != "manifest" ]] ; then
 fi
 
 
-function build_image() {
+function build_and_push_image() {
     DOCKERFILE="$1" ; shift
     DOCKERTAG="$1" ; shift
     echo_run podman build --format docker --pull -f "$DOCKERFILE" -t "$DOCKERTAG" $@ .
     echo_run podman push "$DOCKERTAG"
 }
 
-function build_manifest() {
+function build_and_push_manifest() {
     for tag in "$@" ; do
         echo_run podman rmi $tag || true
         echo_run podman manifest rm $tag || true
@@ -61,10 +61,10 @@ for spackver in "v0.20.3" "v0.21.0" ; do
         DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-${OS_DOCKER_TAG}
         BASE_TAG_NAME=${REMOTE}/spack:base-${OS_DOCKER_TAG}
         if [[ "$1" == "image" ]] ; then
-            build_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$baseimg" "--build-arg SPACK_VER=$spackver"
-            build_image "docker/Dockerfile_base_helper" "${BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$baseimg"
+            build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$baseimg" "--build-arg SPACK_VER=$spackver"
+            build_and_push_image "docker/Dockerfile_base_helper" "${BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$baseimg"
         elif [[ "$1" == "manifest" ]] ; then
-            build_manifest "$DOCKER_TAG" "$BASE_TAG_NAME"
+            build_and_push_manifest "$DOCKER_TAG" "$BASE_TAG_NAME"
         fi
 
         # do the same for cuda base images
@@ -73,10 +73,10 @@ for spackver in "v0.20.3" "v0.21.0" ; do
             CUDA_BASE_TAG_NAME=${REMOTE}/spack:base-cuda${cudaver}-${OS_DOCKER_TAG}
             CUDA_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-cuda${cudaver}-${OS_DOCKER_TAG}
             if [[ "$1" == "image" ]] ; then
-                build_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${CUDA_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg" "--build-arg SPACK_VER=$spackver"
-                build_image "docker/Dockerfile_base_helper" "${CUDA_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg"
+                build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${CUDA_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg" "--build-arg SPACK_VER=$spackver"
+                build_and_push_image "docker/Dockerfile_base_helper" "${CUDA_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$cuda_baseimg"
             elif [[ "$1" == "manifest" ]] ; then
-                build_manifest "$CUDA_DOCKER_TAG" "$CUDA_BASE_TAG_NAME"
+                build_and_push_manifest "$CUDA_DOCKER_TAG" "$CUDA_BASE_TAG_NAME"
             fi
         done
 
@@ -88,8 +88,8 @@ for spackver in "v0.20.3" "v0.21.0" ; do
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
                 ROCM_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-rocm${rocmver}-${OS_DOCKER_TAG}
                 if [[ "$1" == "image" ]] ; then
-                    build_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${ROCM_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg" "--build-arg SPACK_VER=$spackver" "--build-arg ROCM_VERSION=$rocmver"
-                    build_image "docker/Dockerfile_base_helper" "${ROCM_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg"
+                    build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${ROCM_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg" "--build-arg SPACK_VER=$spackver" "--build-arg ROCM_VERSION=$rocmver"
+                    build_and_push_image "docker/Dockerfile_base_helper" "${ROCM_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg"
                 fi
             done
         fi
