@@ -88,8 +88,8 @@ for spackver in "v0.20.3" "v0.21.0" ; do
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
                 ROCM_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-rocm${rocmver}-${OS_DOCKER_TAG}
                 if [[ "$1" == "image" ]] ; then
-                    build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${ROCM_DOCKER_TAG}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg" "--build-arg SPACK_VER=$spackver" "--build-arg ROCM_VERSION=$rocmver"
-                    build_and_push_image "docker/Dockerfile_base_helper" "${ROCM_BASE_TAG_NAME}-$(uname -m)" "--build-arg BASEIMG=$rocm_baseimg"
+                    build_and_push_image "docker/Dockerfile_spack_baseimage_${OS_DOCKER_TAG}" "${ROCM_DOCKER_TAG}" "--build-arg BASEIMG=$rocm_baseimg" "--build-arg SPACK_VER=$spackver" "--build-arg ROCM_VERSION=$rocmver"
+                    build_and_push_image "docker/Dockerfile_base_helper" "${ROCM_BASE_TAG_NAME}" "--build-arg BASEIMG=$rocm_baseimg"
                 fi
             done
         fi
