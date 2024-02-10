@@ -87,7 +87,10 @@ case $TARGET_MACHINE in
         TARGET="zen3" # TODO AMD EPYC 7A53 64-Core Processor # TODO is it 7A53 or 7453?
         ;;
     alps-gh200)
-        #TODO
+        CUDA_ARCH="90"
+        DEFAULT_VARIANTS="${DEFAULT_VARIANTS} cuda_arch=${CUDA_ARCH} +cuda" # NVIDIA GH200 (H100 GPU)0
+        CUDA_EXTERNAL_DEF=${CUDA_EXTERNAL_DEF_TEMPLATE}
+        TARGET="neoverse_v2" # NVIDIA GH200 (Grace CPU is Neoverse V2 architecture)
         ;;
     alps-mi300a)
         #TODO
