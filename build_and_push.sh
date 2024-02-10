@@ -59,9 +59,16 @@ function build_and_push_manifest() {
     done
 }
 
+function read_config() {
+    CONFIG_KEY="$1"
+    CONFIG_FILE="${2:-build-versions.yaml}"
 
-for spackver in "v0.20.3" "v0.21.0" ; do
-    for baseimg in docker.io/ubuntu:22.04 ; do
+    yq ".${CONFIG_KEY}[]" ${CONFIG_FILE}
+}
+
+
+for spackver in $(read_config spackver) ; do
+    for baseimg in $(read_config baseimg) ; do
         SPACK_DOCKER_TAG=$(echo $spackver | sed -e 's/^v//')
         OS_DOCKER_TAG=$(basename "$baseimg" | sed -e 's/://')
         DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-${OS_DOCKER_TAG}
@@ -74,7 +81,7 @@ for spackver in "v0.20.3" "v0.21.0" ; do
         fi
 
         # do the same for cuda base images
-        for cudaver in "11.7.1" ; do
+        for cudaver in $(read_config cudaver) ; do
             cuda_baseimg=docker.io/nvidia/cuda:${cudaver}-devel-${OS_DOCKER_TAG}
             CUDA_BASE_TAG_NAME=${REMOTE}/spack:base-cuda${cudaver}-${OS_DOCKER_TAG}
             CUDA_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-cuda${cudaver}-${OS_DOCKER_TAG}
@@ -88,7 +95,7 @@ for spackver in "v0.20.3" "v0.21.0" ; do
 
         # and for rocm base images - only x86_64, aarch64 does not exist
         if [[ $(uname -m) == "x86_64" ]] ; then
-            for rocmver in "5.6.1" "5.7" ; do
+            for rocmver in $(read_config rocmver) ; do
                 #rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-devel-${OS_DOCKER_TAG}
                 rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
