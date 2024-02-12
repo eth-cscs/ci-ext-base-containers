@@ -6,7 +6,7 @@ COLOR_RED='\033[0;31m'
 trap 'echo -e "${COLOR_RED}Failed building/pushing container images"' ERR
 
 function usage() {
-    echo "Usage: $0 [-r <registry remote>] [-f <config file>] [-l] image|manifest"
+    echo "Usage: $0 [-r <registry remote>] [-c <config file>] [-l] image|manifest"
     exit 0
 }
 
