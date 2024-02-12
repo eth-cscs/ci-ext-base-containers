@@ -19,7 +19,7 @@ function echo_run() {
 REMOTE="docker.io/finkandreas"
 CONFIG_FILE="build-versions.yaml"
 
-while getopts "lhc:f:" Option
+while getopts "lhr:c:" Option
 do
   case $Option in
     r     ) REMOTE=${OPTARG};;
