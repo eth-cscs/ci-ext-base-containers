@@ -6,7 +6,7 @@ COLOR_RED='\033[0;31m'
 trap 'echo -e "${COLOR_RED}Failed building/pushing container images"' ERR
 
 function usage() {
-    echo "Usage: $0 [-r <registry remote>] [-l] image|manifest"
+    echo "Usage: $0 [-r <registry remote>] [-f <config file>] [-l] image|manifest"
     exit 0
 }
 
@@ -15,13 +15,15 @@ function echo_run() {
     "$@"
 }
 
-# default REMOTE
+# default argument values
 REMOTE="docker.io/finkandreas"
+CONFIG_FILE="build-versions.yaml"
 
-while getopts "lhr:" Option
+while getopts "lhrf:" Option
 do
   case $Option in
     r     ) REMOTE=${OPTARG};;
+    f     ) CONFIG_FILE=${OPTARG};;
     l     ) LOCAL='YES';;
     h     ) usage;;
     *     ) echo "Unimplemented option chosen.";;   # DEFAULT
@@ -61,14 +63,14 @@ function build_and_push_manifest() {
 
 function read_config() {
     CONFIG_KEY="$1"
-    CONFIG_FILE="${2:-build-versions.yaml}"
+    CONFIG_FILE="$2"
 
     yq -r ".${CONFIG_KEY}[]" ${CONFIG_FILE}
 }
 
 
-for spackver in $(read_config spackver) ; do
-    for baseimg in $(read_config baseimg) ; do
+for spackver in $(read_config spackver $CONFIG_FILE) ; do
+    for baseimg in $(read_config baseimg $CONFIG_FILE) ; do
         SPACK_DOCKER_TAG=$(echo $spackver | sed -e 's/^v//')
         OS_DOCKER_TAG=$(basename "$baseimg" | sed -e 's/://')
         DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-${OS_DOCKER_TAG}
@@ -81,7 +83,7 @@ for spackver in $(read_config spackver) ; do
         fi
 
         # do the same for cuda base images
-        for cudaver in $(read_config cudaver) ; do
+        for cudaver in $(read_config cudaver $CONFIG_FILE) ; do
             cuda_baseimg=docker.io/nvidia/cuda:${cudaver}-devel-${OS_DOCKER_TAG}
             CUDA_BASE_TAG_NAME=${REMOTE}/spack:base-cuda${cudaver}-${OS_DOCKER_TAG}
             CUDA_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-cuda${cudaver}-${OS_DOCKER_TAG}
@@ -95,7 +97,7 @@ for spackver in $(read_config spackver) ; do
 
         # and for rocm base images - only x86_64, aarch64 does not exist
         if [[ $(uname -m) == "x86_64" ]] ; then
-            for rocmver in $(read_config rocmver) ; do
+            for rocmver in $(read_config rocmver $CONFIG_FILE) ; do
                 #rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-devel-${OS_DOCKER_TAG}
                 rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
