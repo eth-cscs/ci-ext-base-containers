@@ -63,7 +63,7 @@ function read_config() {
     CONFIG_KEY="$1"
     CONFIG_FILE="${2:-build-versions.yaml}"
 
-    yq ".${CONFIG_KEY}[]" ${CONFIG_FILE}
+    yq -r ".${CONFIG_KEY}[]" ${CONFIG_FILE}
 }
 
 
