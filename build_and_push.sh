@@ -19,11 +19,11 @@ function echo_run() {
 REMOTE="docker.io/finkandreas"
 CONFIG_FILE="build-versions.yaml"
 
-while getopts "lhrf:" Option
+while getopts "lhc:f:" Option
 do
   case $Option in
     r     ) REMOTE=${OPTARG};;
-    f     ) CONFIG_FILE=${OPTARG};;
+    c     ) CONFIG_FILE=${OPTARG};;
     l     ) LOCAL='YES';;
     h     ) usage;;
     *     ) echo "Unimplemented option chosen.";;   # DEFAULT
@@ -62,10 +62,10 @@ function build_and_push_manifest() {
 }
 
 function read_config() {
-    CONFIG_KEY="$1"
+    local config_key="$1"
     local conf_file=${2:-$CONFIG_FILE}
 
-    yq -r ".${CONFIG_KEY}[]" ${conf_file}
+    yq -r ".${config_key}[]" ${conf_file}
 }
 
 
