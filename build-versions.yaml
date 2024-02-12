@@ -1,0 +1,10 @@
+baseimg:
+  - "docker.io/ubuntu:22.04"
+spackver:
+  - "v0.20.3"
+  - "v0.21.0"
+cudaver:
+  - "11.7.1"
+rocmver:
+  - "5.6.1"
+  - "5.7"
