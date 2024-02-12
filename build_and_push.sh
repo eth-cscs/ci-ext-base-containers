@@ -6,7 +6,7 @@ COLOR_RED='\033[0;31m'
 trap 'echo -e "${COLOR_RED}Failed building/pushing container images"' ERR
 
 function usage() {
-    echo "Usage: $0 [-r <registry remote>] image|manifest"
+    echo "Usage: $0 [-r <registry remote>] [-l] image|manifest"
     exit 0
 }
 
@@ -18,10 +18,11 @@ function echo_run() {
 # default REMOTE
 REMOTE="docker.io/finkandreas"
 
-while getopts "hr:" Option
+while getopts "lhr:" Option
 do
   case $Option in
     r     ) REMOTE=${OPTARG};;
+    l     ) LOCAL='YES';;
     h     ) usage;;
     *     ) echo "Unimplemented option chosen.";;   # DEFAULT
   esac
@@ -39,7 +40,9 @@ function build_and_push_image() {
     DOCKERFILE="$1" ; shift
     DOCKERTAG="$1" ; shift
     echo_run podman build --format docker --pull -f "$DOCKERFILE" -t "$DOCKERTAG" $@ .
-    echo_run podman push "$DOCKERTAG"
+    if [[ "$LOCAL" != "YES" ]] ; then
+        echo_run podman push "$DOCKERTAG"
+    fi
 }
 
 function build_and_push_manifest() {
@@ -50,7 +53,9 @@ function build_and_push_manifest() {
         for arch in x86_64 aarch64 ; do
             echo_run podman manifest add $tag docker://$tag-$arch
         done
-        echo_run podman manifest push --all $tag docker://$tag
+        if [[ "$LOCAL" != "YES" ]] ; then
+            echo_run podman manifest push --all $tag docker://$tag
+        fi
     done
 }
 
