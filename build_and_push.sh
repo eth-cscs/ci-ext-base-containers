@@ -63,14 +63,14 @@ function build_and_push_manifest() {
 
 function read_config() {
     CONFIG_KEY="$1"
-    CONFIG_FILE="$2"
+    local conf_file=${2:-$CONFIG_FILE}
 
-    yq -r ".${CONFIG_KEY}[]" ${CONFIG_FILE}
+    yq -r ".${CONFIG_KEY}[]" ${conf_file}
 }
 
 
-for spackver in $(read_config spackver $CONFIG_FILE) ; do
-    for baseimg in $(read_config baseimg $CONFIG_FILE) ; do
+for spackver in $(read_config spackver) ; do
+    for baseimg in $(read_config baseimg) ; do
         SPACK_DOCKER_TAG=$(echo $spackver | sed -e 's/^v//')
         OS_DOCKER_TAG=$(basename "$baseimg" | sed -e 's/://')
         DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-${OS_DOCKER_TAG}
@@ -83,7 +83,7 @@ for spackver in $(read_config spackver $CONFIG_FILE) ; do
         fi
 
         # do the same for cuda base images
-        for cudaver in $(read_config cudaver $CONFIG_FILE) ; do
+        for cudaver in $(read_config cudaver) ; do
             cuda_baseimg=docker.io/nvidia/cuda:${cudaver}-devel-${OS_DOCKER_TAG}
             CUDA_BASE_TAG_NAME=${REMOTE}/spack:base-cuda${cudaver}-${OS_DOCKER_TAG}
             CUDA_DOCKER_TAG=${REMOTE}/spack:${SPACK_DOCKER_TAG}-cuda${cudaver}-${OS_DOCKER_TAG}
@@ -97,7 +97,7 @@ for spackver in $(read_config spackver $CONFIG_FILE) ; do
 
         # and for rocm base images - only x86_64, aarch64 does not exist
         if [[ $(uname -m) == "x86_64" ]] ; then
-            for rocmver in $(read_config rocmver $CONFIG_FILE) ; do
+            for rocmver in $(read_config rocmver) ; do
                 #rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-devel-${OS_DOCKER_TAG}
                 rocm_baseimg=docker.io/rocm/dev-ubuntu-22.04:${rocmver}-complete
                 ROCM_BASE_TAG_NAME=${REMOTE}/spack:base-rocm${rocmver}-${OS_DOCKER_TAG}
