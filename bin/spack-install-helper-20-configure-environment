@@ -24,3 +24,8 @@ if [[ -n ${NUM_PROCS} ]] ; then
 else
     echo "WARNING: NUM_PROCS is an empty variable. This is not the usual case, and it should be set to the number of processes that you want to use for building the spack software stack."
 fi
+
+for repo in "${SPACK_REPO_LIST[@]}"
+do
+    spack repo add "${repo}"
+done
