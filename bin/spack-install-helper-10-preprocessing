@@ -8,7 +8,25 @@
 # A100 = 8.0
 # H100 = 9.0
 
+flag_in_list() {
+    for arg in "$@"
+    do
+        if [[ "$arg" == --* ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 SPACK_REPO_LIST=()
+TARGET_MACHINE=
+
+if ! flag_in_list "$@"
+then
+    TARGET_MACHINE=$1
+    shift
+fi
 
 while true
 do
@@ -22,13 +40,21 @@ do
             SPACK_REPO_LIST+=("${1#'--add-repo='}")
             shift
             ;;
+        --arch )
+            TARGET_MACHINE="$2"
+            shift
+            shift
+            ;;
+        --arch=* )
+            TARGET_MACHINE="${1#'--arch='}"
+            shift
+            ;;
         * )
             break
             ;;
     esac
 done
 
-TARGET_MACHINE=$1
 POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
 DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
 CUDA_EXTERNAL_DEF=""
