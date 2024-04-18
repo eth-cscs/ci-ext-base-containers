@@ -70,7 +70,7 @@ for line in fileinput.input():
             assert install_line.find(' install ') != -1
             install_line_cache = install_line.replace(' install ', ' install --cache-only ')
             install_line_nocache = install_line.replace(' install ', ' install --no-cache ').replace(' || \\', ' && \\')
-        print(f'\t+{install_line_cache}')
+        print(f'\t+skip_hash.sh ${{HASH}} || {install_line_cache}')
         print(f'\t  ( {install_line_nocache}')
         match spack_version:
             case ["0", "19", _]:

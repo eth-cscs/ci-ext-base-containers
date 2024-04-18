@@ -8,8 +8,27 @@ echo "Using spack environment yaml config:"
 cat /opt/spack-environment/spack.yaml
 
 cd /opt/spack-environment
+
+# Add custom repositories to spack
+for repo in "${SPACK_REPO_LIST[@]}"
+do
+    spack repo add "${repo}"
+done
+
 spack -e . gpg trust /tmp/spack_sign_key.gpg || echo 'Warning: Could not add spack sign key, i.e. your packages cannot be added to the buildcache'
+
 spack -e . concretize
+
+# Save list of only-dependencies packages in a file
+if [ ${#SPECS_ONLY_DEPENDENCIES[@]} -ne 0 ]; then
+    printf '%s\n' "${SPECS_ONLY_DEPENDENCIES[@]}" | jq --raw-input . | jq --slurp --compact-output . > only-dependencies.json
+fi
+
 spack -e . env depfile | spack-modify-makefile-push-buildcache > Makefile
 make -j$NUM_PROCS SPACK_COLOR=always --output-sync=recurse
-spack -e . gc -y
+
+# Do garbage collection only when there are no packages with --only-dependencies
+# Otherwise it removes all the dependencies of such packages because they are not installed
+if [ ${#SPECS_ONLY_DEPENDENCIES[@]} -eq 0 ]; then
+    spack -e . gc -y
+fi

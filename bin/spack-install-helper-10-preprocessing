@@ -20,6 +20,8 @@ flag_in_list() {
 }
 
 SPACK_REPO_LIST=()
+SPECS=()
+SPECS_ONLY_DEPENDENCIES=()
 TARGET_MACHINE=
 
 POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
@@ -56,11 +58,29 @@ do
             TARGET_MACHINE="${1#'--arch='}"
             shift
             ;;
+        --only-dependencies )
+            SPECS+=("$2")
+            SPECS_ONLY_DEPENDENCIES+=("$2")
+            shift
+            shift
+            ;;
+        --only-dependencies=* )
+            VAL="${1#'--only-dependencies='}"
+            SPECS+=("$VAL")
+            SPECS_ONLY_DEPENDENCIES+=("$VAL")
+            shift
+            shift
         * )
             break
             ;;
     esac
 done
+
+# All other arguments are specs
+SPECS+=($@)
+
+# Always add mpich
+SPECS+=('mpich@3.1.4 netmod=tcp device=ch3')
 
 CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
 ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
@@ -142,11 +162,11 @@ case $TARGET_MACHINE in
         #TODO
         ;;
     *)
+        # TODO --arch flag sets the target now
         echo "The first argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
         exit 1
         ;;
 esac
-shift
 
 
 # at this point the rest of the arguments are supposed to be valid spack sepcs
