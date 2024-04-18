@@ -37,7 +37,7 @@ then
     shift
 fi
 
-while true
+while [[ $# -gt 0 ]]
 do
     case $1 in
         --add-repo )
@@ -68,7 +68,6 @@ do
             VAL="${1#'--only-dependencies='}"
             SPECS+=("$VAL")
             SPECS_ONLY_DEPENDENCIES+=("$VAL")
-            shift
             shift
             ;;
         * )
