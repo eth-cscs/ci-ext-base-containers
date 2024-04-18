@@ -22,6 +22,13 @@ flag_in_list() {
 SPACK_REPO_LIST=()
 TARGET_MACHINE=
 
+POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
+DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
+CUDA_EXTERNAL_DEF=""
+ROCM_EXTERNAL_DEF=""
+ROCM_ARCH=""
+CUDA_ARCH=""
+
 if ! flag_in_list "$@"
 then
     TARGET_MACHINE=$1
@@ -54,13 +61,6 @@ do
             ;;
     esac
 done
-
-POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
-DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
-CUDA_EXTERNAL_DEF=""
-ROCM_EXTERNAL_DEF=""
-ROCM_ARCH=""
-CUDA_ARCH=""
 
 CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
 ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
