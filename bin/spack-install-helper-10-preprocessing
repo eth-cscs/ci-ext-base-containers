@@ -8,6 +8,26 @@
 # A100 = 8.0
 # H100 = 9.0
 
+SPACK_REPO_LIST=()
+
+while true
+do
+    case $1 in
+        --add-repo )
+            SPACK_REPO_LIST+=("$2")
+            shift
+            shift
+            ;;
+        --add-repo=* )
+            SPACK_REPO_LIST+=("${1#'--add-repo='}")
+            shift
+            ;;
+        * )
+            break
+            ;;
+    esac
+done
+
 TARGET_MACHINE=$1
 POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
 DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
