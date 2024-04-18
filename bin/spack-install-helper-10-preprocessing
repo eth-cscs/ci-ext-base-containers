@@ -70,6 +70,7 @@ do
             SPECS_ONLY_DEPENDENCIES+=("$VAL")
             shift
             shift
+            ;;
         * )
             SPECS+=("$1")
             shift
