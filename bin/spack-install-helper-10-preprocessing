@@ -71,13 +71,11 @@ do
             shift
             shift
         * )
-            break
+            SPECS+=("$1")
+            shift
             ;;
     esac
 done
-
-# All other arguments are specs
-SPECS+=($@)
 
 # Always add mpich
 SPECS+=('mpich@3.1.4 netmod=tcp device=ch3')
