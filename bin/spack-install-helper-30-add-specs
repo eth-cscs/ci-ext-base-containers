@@ -3,5 +3,4 @@
 # Steps in this module:
 # - Add scpecs to the environment
 
-spack -e /opt/spack-environment add 'mpich@3.1.4 netmod=tcp device=ch3'
-spack -e /opt/spack-environment add "$@"
+spack -e /opt/spack-environment add "${SPECS[@]}"

@@ -8,27 +8,22 @@
 # A100 = 8.0
 # H100 = 9.0
 
+flag_in_list() {
+    for arg in "$@"
+    do
+        if [[ "$arg" == --* ]]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
 SPACK_REPO_LIST=()
+SPECS=()
+SPECS_ONLY_DEPENDENCIES=()
+TARGET_MACHINE=
 
-while true
-do
-    case $1 in
-        --add-repo )
-            SPACK_REPO_LIST+=("$2")
-            shift
-            shift
-            ;;
-        --add-repo=* )
-            SPACK_REPO_LIST+=("${1#'--add-repo='}")
-            shift
-            ;;
-        * )
-            break
-            ;;
-    esac
-done
-
-TARGET_MACHINE=$1
 POSSIBLE_TARGETS="daint-gpu daint-mc alps-zen2 alps-a100 alps-mi200 alps-gh200 alps-mi300a"
 DEFAULT_VARIANTS="+openmp +mpi build_type=Release"
 CUDA_EXTERNAL_DEF=""
@@ -81,6 +76,58 @@ llvm-amdgpu:
 EOF
 )
 
+# This is to ensure backwards compatibility
+# If there are no flags starting with --XXX, we assume arguments
+# spack-install-helper target-machine spec1 spec2
+if ! flag_in_list "$@"
+then
+    TARGET_MACHINE=$1
+    shift
+fi
+
+while [[ $# -gt 0 ]]
+do
+    case $1 in
+        --add-repo )
+            SPACK_REPO_LIST+=("$2")
+            shift
+            shift
+            ;;
+        --add-repo=* )
+            SPACK_REPO_LIST+=("${1#'--add-repo='}")
+            shift
+            ;;
+        --target )
+            TARGET_MACHINE="$2"
+            shift
+            shift
+            ;;
+        --target=* )
+            TARGET_MACHINE="${1#'--target='}"
+            shift
+            ;;
+        --only-dependencies )
+            SPECS+=("$2")
+            SPECS_ONLY_DEPENDENCIES+=("$2")
+            shift
+            shift
+            ;;
+        --only-dependencies=* )
+            VAL="${1#'--only-dependencies='}"
+            SPECS+=("$VAL")
+            SPECS_ONLY_DEPENDENCIES+=("$VAL")
+            shift
+            ;;
+        * )
+            SPECS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Always add mpich
+SPECS+=('mpich@3.1.4 netmod=tcp device=ch3')
+
 case $TARGET_MACHINE in
     daint-gpu)
         CUDA_ARCH="60"
@@ -116,11 +163,10 @@ case $TARGET_MACHINE in
         #TODO
         ;;
     *)
-        echo "The first argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
+        echo "The target argument must be any of '$POSSIBLE_TARGETS'."
         exit 1
         ;;
 esac
-shift
 
 
 # at this point the rest of the arguments are supposed to be valid spack sepcs

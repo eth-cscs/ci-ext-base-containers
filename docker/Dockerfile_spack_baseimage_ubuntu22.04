@@ -35,6 +35,7 @@ RUN apt-get update \
     unzip \
     vim \
     less \
+    jq \
   && locale-gen en_US.UTF-8 \
   && rm -Rf /var/lib/apt/lists/*
 
