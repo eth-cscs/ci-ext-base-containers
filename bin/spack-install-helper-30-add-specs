@@ -3,4 +3,4 @@
 # Steps in this module:
 # - Add scpecs to the environment
 
-spack -e /opt/spack-environment add ${SPECS[@]}
+spack -e /opt/spack-environment add "${SPECS[@]}"

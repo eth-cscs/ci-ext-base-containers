@@ -31,6 +31,9 @@ ROCM_EXTERNAL_DEF=""
 ROCM_ARCH=""
 CUDA_ARCH=""
 
+# This is to ensure backwards compatibility
+# If there are no flags starting with --XXX, we assume arguments
+# spack-install-helper target-machine spec1 spec2
 if ! flag_in_list "$@"
 then
     TARGET_MACHINE=$1
@@ -160,8 +163,7 @@ case $TARGET_MACHINE in
         #TODO
         ;;
     *)
-        # TODO --arch flag sets the target now
-        echo "The target argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
+        echo "The target argument must be any of '$POSSIBLE_TARGETS'."
         exit 1
         ;;
 esac
