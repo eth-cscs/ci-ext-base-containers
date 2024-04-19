@@ -31,6 +31,51 @@ ROCM_EXTERNAL_DEF=""
 ROCM_ARCH=""
 CUDA_ARCH=""
 
+CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
+ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
+llvm-amdgpu:
+      externals:
+      - spec: llvm-amdgpu@${ROCM_VERSION} ~rocm-device-libs
+        prefix: /opt/rocm-${ROCM_VERSION}/llvm
+      buildable: false
+    rocm-device-libs:
+      externals:
+      - spec: rocm-device-libs@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    hip:
+      externals:
+      - spec: hip@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocblas:
+      externals:
+      - spec: rocblas@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocsolver:
+      externals:
+      - spec: rocsolver@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocprim:
+      externals:
+      - spec: rocprim@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    rocthrust:
+      externals:
+      - spec: rocthrust@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+    hsa-rocr-dev:
+      externals:
+      - spec: hsa-rocr-dev@${ROCM_VERSION}
+        prefix: /opt/rocm-${ROCM_VERSION}
+      buildable: false
+EOF
+)
+
 # This is to ensure backwards compatibility
 # If there are no flags starting with --XXX, we assume arguments
 # spack-install-helper target-machine spec1 spec2
@@ -82,51 +127,6 @@ done
 
 # Always add mpich
 SPECS+=('mpich@3.1.4 netmod=tcp device=ch3')
-
-CUDA_EXTERNAL_DEF_TEMPLATE="cuda: {externals: [{spec: cuda@$ALSO_CUDA_VERSION, prefix: /usr/local/cuda}], buildable: false}"
-ROCM_EXTERNAL_DEF_TEMPLATE=$(cat <<- EOF
-llvm-amdgpu:
-      externals:
-      - spec: llvm-amdgpu@${ROCM_VERSION} ~rocm-device-libs
-        prefix: /opt/rocm-${ROCM_VERSION}/llvm
-      buildable: false
-    rocm-device-libs:
-      externals:
-      - spec: rocm-device-libs@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    hip:
-      externals:
-      - spec: hip@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    rocblas:
-      externals:
-      - spec: rocblas@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    rocsolver:
-      externals:
-      - spec: rocsolver@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    rocprim:
-      externals:
-      - spec: rocprim@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    rocthrust:
-      externals:
-      - spec: rocthrust@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-    hsa-rocr-dev:
-      externals:
-      - spec: hsa-rocr-dev@${ROCM_VERSION}
-        prefix: /opt/rocm-${ROCM_VERSION}
-      buildable: false
-EOF
-)
 
 case $TARGET_MACHINE in
     daint-gpu)
