@@ -49,13 +49,13 @@ do
             SPACK_REPO_LIST+=("${1#'--add-repo='}")
             shift
             ;;
-        --arch )
+        --target )
             TARGET_MACHINE="$2"
             shift
             shift
             ;;
-        --arch=* )
-            TARGET_MACHINE="${1#'--arch='}"
+        --target=* )
+            TARGET_MACHINE="${1#'--target='}"
             shift
             ;;
         --only-dependencies )
@@ -161,7 +161,7 @@ case $TARGET_MACHINE in
         ;;
     *)
         # TODO --arch flag sets the target now
-        echo "The first argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
+        echo "The target argument must be any of '$POSSIBLE_TARGETS'. The rest of the arguments must be valid spack specs"
         exit 1
         ;;
 esac
