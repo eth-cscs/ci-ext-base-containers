@@ -35,5 +35,7 @@ deploy_job_helper_image-{{os}}{{osver}}-{{archstr[arch]}}:
     SRC: "{{registry_helper_image_name_tag}}"
     DST: "{{deploy_helper_image_name_tag}}"
   script:
-    - echo ${JFROG_ACCESS_TOKEN} | skopeo login --username rjanalik --password-stdin jfrog.svc.cscs.ch
+    - DST_REGISTRY=${DST%%/*}
+    - echo ${DST_REGISTRY}
+    - echo ${DEPLOY_REGISTRY_PASSWORD} | skopeo login --username ${DEPLOY_REGISTRY_USERNAME} --password-stdin ${DST_REGISTRY}
     - skopeo copy "docker://${SRC}" "docker://${DST}"
