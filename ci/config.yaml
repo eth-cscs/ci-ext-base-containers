@@ -1,0 +1,53 @@
+# Build versions
+os:
+  ubuntu:
+    - "22.04"
+      #fedora:
+      #  - "39"
+      #  - "40"
+spackver:
+  #- "0.20.3"
+  - "0.21.0"
+cudaver:
+  - "11.7.1"
+rocmver:
+  - "5.6.1"
+    #- "5.7"
+
+# Global variables
+registry_path: "$CSCS_REGISTRY_PATH/test/$CI_COMMIT_SHORT_SHA"
+deploy_path: "$CSCS_REGISTRY_PATH/deploy"
+
+# Template variables
+basedockerfile: "docker/Dockerfile_spack_baseimage_{{os}}{{osver}}"
+helperdockerfile: "docker/Dockerfile_base_helper"
+registry_base_image_name_tag: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_base_image_name_tag: "{{deploy_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+registry_helper_image_name_tag: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_helper_image_name_tag: "{{deploy_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+baseimg:
+  cpu: "docker.io/{{os}}:{{osver}}"
+  cuda: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
+  rocm: "docker.io/rocm/dev-{{os}}-{{osver}}:{{rocmver}}-complete"
+archstr:
+  cpu: "cpu"
+  cuda: "cuda{{cudaver}}"
+  rocm: "rocm{{rocmver}}"
+docker_build_args_base:
+  cpu:  '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  cuda: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  rocm: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}", "ROCM_VERSION={{rocmver}}"]'
+docker_build_args_helper:
+  cpu:  '["BASEIMG={{baseimg[arch]}}"]'
+  cuda: '["BASEIMG={{baseimg[arch]}}"]'
+  rocm: '["BASEIMG={{baseimg[arch]}}"]'
+container_builder:
+  cpu:  ".container-builder-cscs-zen2"
+  cuda: ".container-builder-cscs-zen2"
+  rocm: ".container-builder-cscs-zen2"
+container_runner:
+  cpu:  ".container-runner-daint-gpu"
+  cuda: ".container-runner-daint-gpu"
+  rocm: ".container-runner-daint-gpu"
+container_deploy: ".container-runner-lightweight-zen2"
+deploy_runner_image: "quay.io/skopeo/stable:latest"
