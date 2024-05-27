@@ -22,8 +22,10 @@ def recursive_render(tpl, values):
 def generate_job(template, os, osver, spackver, target, cudaver=None, rocmver=None):
     if target == "cpu":
         spack_target = "alps-zen2"
-    elif target == "cuda":
+    elif target == "cuda-x86_64":
         spack_target = "alps-a100"
+    elif target == "cuda-aarch64":
+        spack_target = "alps-gh200"
     elif target == "rocm":
         spack_target = "alps-mi200"
     else:
@@ -55,7 +57,9 @@ def generate_template(template_file, os_dict, spackver_list, cudaver_list, rocmv
                 pipeline.append(generate_job(template, os, osver, spackver, target, None, None))
 
                 for cudaver in cudaver_list:
-                    target = "cuda"
+                    target = "cuda-x86_64"
+                    pipeline.append(generate_job(template, os, osver, spackver, target, cudaver, None))
+                    target = "cuda-aarch64"
                     pipeline.append(generate_job(template, os, osver, spackver, target, cudaver, None))
 
                 for rocmver in rocmver_list:

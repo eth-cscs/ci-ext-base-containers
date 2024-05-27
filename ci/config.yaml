@@ -27,27 +27,33 @@ registry_helper_image_name_tag: "{{registry_path}}/spack-helper:{{os}}{{osver}}-
 deploy_helper_image_name_tag: "{{deploy_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
 baseimg:
   cpu: "docker.io/{{os}}:{{osver}}"
-  cuda: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
+  cuda-x86_64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
+  cuda-aarch64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
   rocm: "docker.io/rocm/dev-{{os}}-{{osver}}:{{rocmver}}-complete"
 archstr:
-  cpu: "cpu"
-  cuda: "cuda{{cudaver}}"
-  rocm: "rocm{{rocmver}}"
+  cpu: "cpu-x86_64"
+  cuda-x86_64: "cuda{{cudaver}}-x86_64"
+  cuda-aarch64: "cuda{{cudaver}}-aarch64"
+  rocm: "rocm{{rocmver}}-x86_64"
 docker_build_args_base:
   cpu:  '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
-  cuda: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  cuda-x86_64: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  cuda-aarch64: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
   rocm: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}", "ROCM_VERSION={{rocmver}}"]'
 docker_build_args_helper:
   cpu:  '["BASEIMG={{baseimg[arch]}}"]'
-  cuda: '["BASEIMG={{baseimg[arch]}}"]'
+  cuda-x86_64: '["BASEIMG={{baseimg[arch]}}"]'
+  cuda-aarch64: '["BASEIMG={{baseimg[arch]}}"]'
   rocm: '["BASEIMG={{baseimg[arch]}}"]'
 container_builder:
   cpu:  ".container-builder-cscs-zen2"
-  cuda: ".container-builder-cscs-zen2"
+  cuda-x86_64: ".container-builder-cscs-zen2"
+  cuda-aarch64: ".container-builder-cscs-gh200"
   rocm: ".container-builder-cscs-zen2"
 container_runner:
   cpu:  ".container-runner-daint-gpu"
-  cuda: ".container-runner-daint-gpu"
+  cuda-x86_64: ".container-runner-daint-gpu"
+  cuda-aarch64: ".container-runner-santis-gh200"
   rocm: ".container-runner-daint-gpu"
 container_deploy: ".container-runner-lightweight-zen2"
 deploy_runner_image: "quay.io/skopeo/stable:latest"

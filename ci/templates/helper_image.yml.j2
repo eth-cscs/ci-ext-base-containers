@@ -15,7 +15,7 @@ test_job_helper_image-{{os}}{{osver}}-{{archstr[arch]}}:
   script:
     - '[[ $(source /etc/os-release && echo $ID) == "{{os}}" ]]'
     - '[[ $(source /etc/os-release && echo $VERSION_ID) == "{{osver}}" ]]'
-    {% if arch == "cuda" -%}
+    {% if arch.startswith("cuda") -%}
     - 'apt-cache show cuda-libraries-* | grep "Version: {{cudaver}}"'
     {%- endif %}
     {% if arch == "rocm" -%}

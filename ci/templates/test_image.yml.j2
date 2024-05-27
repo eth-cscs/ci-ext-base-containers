@@ -39,7 +39,7 @@ test_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     {% if arch == "cpu" -%}
     - gmx_mpi -version | grep "^GPU support:\s\+disabled$"
     {%- endif %}
-    {% if arch == "cuda" -%}
+    {% if arch.startswith("cuda") -%}
     - gmx_mpi -version | grep "^GPU support:\s\+CUDA$"
     {%- endif %}
     {% if arch == "rocm" -%}

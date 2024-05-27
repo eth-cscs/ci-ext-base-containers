@@ -17,7 +17,7 @@ test_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     - '[[ $(source /etc/os-release && echo $VERSION_ID) == "{{osver}}" ]]'
     - '[[ $(spack --version) == "{{spackver}}" ]]'
     - which spack-install-helper
-    {% if arch == "cuda" -%}
+    {% if arch.startswith("cuda") -%}
     - 'apt-cache show cuda-libraries-* | grep "Version: {{cudaver}}"'
     {%- endif %}
     {% if arch == "rocm" -%}
