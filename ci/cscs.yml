@@ -7,27 +7,25 @@ stages:
   - run
 
 variables:
-  CI_GENERATOR_IMAGE_NAME: $CSCS_REGISTRY_PATH/public/ci-generator:$CI_GENERATOR_TAG
+  CI_GENERATOR_IMAGE_NAME: $CSCS_REGISTRY_PATH/public/ci-generator
 
 build-ci-generator-image:
   stage: prepare
   extends: .container-builder-cscs-zen2
   before_script:
-    - echo $CI_GENERATOR_IMAGE_NAME
     - export CI_GENERATOR_TAG=`cat ci/docker/* | sha256sum - | head -c 16`
-    - export PERSIST_IMAGE_NAME=$CSCS_REGISTRY_PATH/public/ci-generator:$CI_GENERATOR_TAG
+    - export PERSIST_IMAGE_NAME=$CI_GENERATOR_IMAGE_NAME:$CI_GENERATOR_TAG
     - echo "CI_GENERATOR_TAG=$CI_GENERATOR_TAG" > build.env
   artifacts:
     reports:
       dotenv: build.env
   variables:
-    DOCKERFILE: ci/docker/Dockerfile
-    PERSIST_IMAGE_NAME: $CI_GENERATOR_IMAGE_NAME
+    DOCKERFILE: ci/docker/Dockerfile.ci-generator
 
 pipeline-configure:
   stage: configure
   extends: .container-runner-lightweight-zen2
-  image: $CI_GENERATOR_IMAGE_NAME
+  image: $CI_GENERATOR_IMAGE_NAME:$CI_GENERATOR_TAG
   script:
     - ci/ci-generator.py > pipeline.yml
   artifacts:
