@@ -9,6 +9,8 @@ COPY bin/fix_spack_install /usr/local/bin/fix_spack_install
 # Workaround for NVIDIA driver mismatch
 ENV NVIDIA_DISABLE_REQUIRE=true
 
-ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
+#ENTRYPOINT ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
+COPY docker/entrypoint.sh /
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]
 SHELL ["/bin/bash", "--rcfile", "/etc/profile", "-l", "-c"]
