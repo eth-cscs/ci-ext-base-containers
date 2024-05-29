@@ -21,6 +21,7 @@ build-ci-generator-image:
       dotenv: build.env
   variables:
     DOCKERFILE: ci/docker/Dockerfile.ci-generator
+    CSCS_REBUILD_POLICY: "if-not-exists"
 
 pipeline-configure:
   stage: configure
