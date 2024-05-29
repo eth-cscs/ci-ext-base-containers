@@ -6,7 +6,6 @@ WORKDIR /usr/src/app
 COPY ci/docker/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Dummy comment to trigger rebuild
 #COPY . .
 
 #CMD [ "python", "./your-daemon-or-script.py" ]
