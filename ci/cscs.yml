@@ -23,7 +23,7 @@ build-ci-generator-image:
     DOCKERFILE: ci/docker/Dockerfile.ci-generator
     CSCS_REBUILD_POLICY: "if-not-exists"
 
-pipeline-configure:
+configure-pipeline:
   stage: configure
   extends: .container-runner-lightweight-zen2
   image: $CI_GENERATOR_IMAGE_NAME:$CI_GENERATOR_TAG
@@ -33,12 +33,12 @@ pipeline-configure:
     paths:
       - pipeline.yml
 
-generated-pipeline:
+run-pipeline:
   stage: run
   trigger:
     include:
       - artifact: pipeline.yml
-        job: pipeline-configure
+        job: configure-pipeline
     forward:
       pipeline_variables: true
     strategy: depend
