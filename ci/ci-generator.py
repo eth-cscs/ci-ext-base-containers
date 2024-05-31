@@ -77,6 +77,7 @@ pipeline.append(
 
 stages:
   - build_base_image
+  - create_multiarch_base_image
   - test_base_image
   - build_test_image
   - test_test_image

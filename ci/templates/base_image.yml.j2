@@ -4,8 +4,20 @@ build_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     - {{container_builder[arch]}}
   variables:
     DOCKERFILE: "{{basedockerfile}}"
-    PERSIST_IMAGE_NAME: "{{registry_base_image_name_tag}}"
+    PERSIST_IMAGE_NAME: "{{build_base_image_name_tag[arch]}}"
     DOCKER_BUILD_ARGS: '{{docker_build_args_base[arch]}}'
+
+{% if arch == "cuda-aarch64" %}
+# We have multiarch image only for CUDA
+# and we need only one job for CUDA, aarch64 is an arbitrary choice
+create_job_base_image_multiarch-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: create_multiarch_base_image
+  extends: .make-multiarch-image
+  variables:
+    PERSIST_IMAGE_NAME_X86_64: "{{build_base_image_name_tag['cuda-x86_64']}}"
+    PERSIST_IMAGE_NAME_AARCH64: "{{build_base_image_name_tag['cuda-aarch64']}}"
+    PERSIST_IMAGE_NAME: "{{registry_base_image_name_tag}}"
+{% endif %}
 
 test_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: test_base_image
@@ -24,6 +36,9 @@ test_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     - 'apt-cache show rocm-core | grep "Version: {{rocmver}}."'
     {%- endif %}
 
+{% if arch != "cuda-x86_64" %}
+# We have multiarch image only for CUDA
+# and we need only one job for CUDA, aarch64 is an arbitrary choice
 deploy_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: deploy_base_image
   extends:
@@ -43,10 +58,11 @@ deploy_job_base_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     - DST_REGISTRY=${DST%%/*}
     - echo ${DST_REGISTRY}
     - echo ${DEPLOY_JFROG_PASSWORD} | skopeo login --username ${DEPLOY_JFROG_USERNAME} --password-stdin ${DST_REGISTRY}
-    - skopeo copy "docker://${SRC}" "docker://${DST}"
+    - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
     - echo "Deploy to GitHub"
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
     - echo ${DST_REGISTRY}
     - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
-    - skopeo copy "docker://${SRC}" "docker://${DST}"
+    - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
+{% endif %}

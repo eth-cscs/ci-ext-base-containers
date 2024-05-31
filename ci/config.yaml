@@ -23,22 +23,37 @@ deploy_path_github: "ghcr.io/eth-cscs/docker-ci-ext/base-containers"
 # Template variables
 basedockerfile: "docker/Dockerfile_spack_baseimage_{{os}}{{osver}}"
 helperdockerfile: "docker/Dockerfile_base_helper"
-registry_base_image_name_tag: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_base_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_base_image_name_tag_github: "{{deploy_path_github}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-registry_helper_image_name_tag: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_helper_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_helper_image_name_tag_github: "{{deploy_path_github}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+build_base_image_name_tag:
+  cpu: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  cuda-x86_64: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr['cuda-x86_64']}}"
+  cuda-aarch64: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr['cuda-aarch64']}}"
+  rocm: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+registry_base_image_name_tag: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_base_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_base_image_name_tag_github: "{{deploy_path_github}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+build_helper_image_name_tag:
+  cpu: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+  cuda-x86_64: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr['cuda-x86_64']}}"
+  cuda-aarch64: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr['cuda-aarch64']}}"
+  rocm: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+registry_helper_image_name_tag: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_helper_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-helper:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_helper_image_name_tag_github: "{{deploy_path_github}}/spack-helper:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
 baseimg:
   cpu: "docker.io/{{os}}:{{osver}}"
   cuda-x86_64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
   cuda-aarch64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
   rocm: "docker.io/rocm/dev-{{os}}-{{osver}}:{{rocmver}}-complete"
 archstr:
-  cpu: "cpu-x86_64"
+  cpu: "cpu"
   cuda-x86_64: "cuda{{cudaver}}-x86_64"
   cuda-aarch64: "cuda{{cudaver}}-aarch64"
-  rocm: "rocm{{rocmver}}-x86_64"
+  rocm: "rocm{{rocmver}}"
+archstr_deploy:
+  cpu: "cpu"
+  cuda-x86_64: "cuda{{cudaver}}"
+  cuda-aarch64: "cuda{{cudaver}}"
+  rocm: "rocm{{rocmver}}"
 docker_build_args_base:
   cpu:  '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
   cuda-x86_64: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
