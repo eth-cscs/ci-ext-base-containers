@@ -33,9 +33,18 @@ deploy_job_helper_image-{{os}}{{osver}}-{{archstr[arch]}}:
       allow_failure: true
   variables:
     SRC: "{{registry_helper_image_name_tag}}"
-    DST: "{{deploy_helper_image_name_tag}}"
+    DST_JFROG: "{{deploy_helper_image_name_tag_jfrog}}"
+    DST_GITHUB: "{{deploy_helper_image_name_tag_github}}"
   script:
+    - echo "Deploy to JFrog"
+    - DST=$DST_JFROG
     - DST_REGISTRY=${DST%%/*}
     - echo ${DST_REGISTRY}
-    - echo ${DEPLOY_REGISTRY_PASSWORD} | skopeo login --username ${DEPLOY_REGISTRY_USERNAME} --password-stdin ${DST_REGISTRY}
+    - echo ${DEPLOY_JFROG_PASSWORD} | skopeo login --username ${DEPLOY_JFROG_USERNAME} --password-stdin ${DST_REGISTRY}
+    - skopeo copy "docker://${SRC}" "docker://${DST}"
+    - echo "Deploy to GitHub"
+    - DST=$DST_GITHUB
+    - DST_REGISTRY=${DST%%/*}
+    - echo ${DST_REGISTRY}
+    - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
     - skopeo copy "docker://${SRC}" "docker://${DST}"

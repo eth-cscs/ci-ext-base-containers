@@ -17,15 +17,18 @@ rocmver:
 
 # Global variables
 registry_path: "$CSCS_REGISTRY_PATH/test/$CI_COMMIT_SHORT_SHA"
-deploy_path: "$CSCS_REGISTRY_PATH/deploy"
+deploy_path_jfrog: "$CSCS_REGISTRY_PATH/deploy"
+deploy_path_github: "ghcr.io/eth-cscs/docker-ci-ext/base-containers"
 
 # Template variables
 basedockerfile: "docker/Dockerfile_spack_baseimage_{{os}}{{osver}}"
 helperdockerfile: "docker/Dockerfile_base_helper"
 registry_base_image_name_tag: "{{registry_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_base_image_name_tag: "{{deploy_path}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_base_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_base_image_name_tag_github: "{{deploy_path_github}}/spack-base:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
 registry_helper_image_name_tag: "{{registry_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
-deploy_helper_image_name_tag: "{{deploy_path}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_helper_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
+deploy_helper_image_name_tag_github: "{{deploy_path_github}}/spack-helper:{{os}}{{osver}}-{{archstr[arch]}}"
 baseimg:
   cpu: "docker.io/{{os}}:{{osver}}"
   cuda-x86_64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
