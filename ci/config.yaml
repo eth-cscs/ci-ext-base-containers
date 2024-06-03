@@ -17,7 +17,7 @@ rocmver:
 
 # Global variables
 registry_path: "$CSCS_REGISTRY_PATH/test/$CI_COMMIT_SHORT_SHA"
-deploy_path_jfrog: "$CSCS_REGISTRY_PATH/deploy"
+deploy_path_jfrog: "$CSCS_REGISTRY/docker-ci-ext/base-containers/public"
 deploy_path_github: "ghcr.io/eth-cscs/docker-ci-ext/base-containers"
 
 # Template variables
