@@ -7,7 +7,7 @@ build_job_test_image_libtree-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}
   variables:
     DOCKERFILE: "test/Dockerfile.libtree"
     PERSIST_IMAGE_NAME: "{{registry_path}}/test-libtree:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-    DOCKER_BUILD_ARGS: '["BASEIMG={{registry_base_image_name_tag}}", "HELPERIMG={{registry_helper_image_name_tag}}", "TARGET={{spack_target}}"]'
+    DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
 
 test_job_test_image_libtree-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: test_test_image
@@ -26,7 +26,7 @@ build_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}
   variables:
     DOCKERFILE: "test/Dockerfile.gromacs"
     PERSIST_IMAGE_NAME: "{{registry_path}}/test-gromacs:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
-    DOCKER_BUILD_ARGS: '["BASEIMG={{registry_base_image_name_tag}}", "HELPERIMG={{registry_helper_image_name_tag}}", "TARGET={{spack_target}}"]'
+    DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
 
 test_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: test_test_image

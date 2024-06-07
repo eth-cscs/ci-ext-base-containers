@@ -1,5 +1,5 @@
-ARG BASEIMG
-FROM $BASEIMG as builder
+ARG BUILDIMG
+FROM $BUILDIMG as builder
 
 ARG TARGET
 RUN spack-install-helper \
@@ -9,8 +9,8 @@ RUN spack-install-helper \
 # end of builder container, now we are ready to copy necessary files
 
 # copy only relevant parts to the final container
-ARG HELPERIMG
-FROM $HELPERIMG
+ARG RUNTIMEIMG
+FROM $RUNTIMEIMG
 
 # it is important to keep the paths, otherwise your installation is broken
 # all these paths are created with the above `spack-install-helper` invocation
