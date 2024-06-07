@@ -72,7 +72,7 @@ container_builder:
 container_runner:
   cpu:  ".container-runner-daint-gpu"
   cuda-x86_64: ".container-runner-daint-gpu"
-  cuda-aarch64: ".container-runner-santis-gh200"
+  cuda-aarch64: ".container-runner-todi-gh200"
   rocm: ".container-runner-daint-gpu"
 container_deploy: ".container-runner-lightweight-zen2"
 deploy_runner_image: "quay.io/skopeo/stable:latest"
