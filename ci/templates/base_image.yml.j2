@@ -78,6 +78,7 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-githu
     - echo "Deploy to GitHub"
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
+    - SRC_REGISTRY=${SRC%%/*}
     - echo ${DST_REGISTRY}
     - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
     - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
