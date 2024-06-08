@@ -76,6 +76,7 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-githu
     DST_GITHUB: "{{deploy_build_image_name_tag_github}}"
   script:
     - echo "Deploy to GitHub"
+    - !reference [.fetch-registry-tokens, script]
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
     - SRC_REGISTRY=${SRC%%/*}
