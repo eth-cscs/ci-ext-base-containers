@@ -79,6 +79,7 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-githu
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
     - echo ${DST_REGISTRY}
+    - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
     - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
     - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
 {% endif %}
