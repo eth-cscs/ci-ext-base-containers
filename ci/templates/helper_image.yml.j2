@@ -55,13 +55,11 @@ deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
     - !reference [.fetch-registry-tokens, script]
     - DST=$DST_JFROG
     - DST_REGISTRY=${DST%%/*}
-    - echo ${DST_REGISTRY}
     - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
     - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
     - echo "Deploy to GitHub"
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
-    - echo ${DST_REGISTRY}
     - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
     - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
 {% endif %}
