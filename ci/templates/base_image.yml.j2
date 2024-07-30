@@ -60,6 +60,7 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-jfrog
     - echo ${DST_REGISTRY}
     - echo "${CSCS_REGISTRY_USER} ${CSCS_REGISTRY_PASSWORD} ${DST_REGISTRY}"
     - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
+    - echo skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
     - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
 
 deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-github:
