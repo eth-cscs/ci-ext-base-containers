@@ -70,7 +70,7 @@ container_builder:
   cuda-aarch64: ".container-builder-cscs-gh200"
   rocm: ".container-builder-cscs-zen2"
 container_runner:
-  cpu:  ".container-runner-eiger-mc-f7t"
+  cpu:  ".container-runner-daint-gpu"
   cuda-x86_64: ".container-runner-daint-gpu"
   cuda-aarch64: ".container-runner-todi-gh200"
   rocm: ".container-runner-daint-gpu"
