@@ -37,7 +37,7 @@ test_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
 {% if arch != "cuda-x86_64" %}
 # We have multiarch image only for CUDA
 # and we need only one job for CUDA, aarch64 is an arbitrary choice
-deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
+deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-jfrog:
   stage: deploy_base_image
   extends:
     - {{container_deploy}}
@@ -57,7 +57,23 @@ deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
     - DST_REGISTRY=${DST%%/*}
     - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
     - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
+
+deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-github:
+  stage: deploy_base_image
+  extends:
+    - {{container_deploy}}
+  image: {{deploy_runner_image}}
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "main"
+      when: manual
+      allow_failure: true
+  variables:
+    SRC: "{{registry_runtime_image_name_tag}}"
+    DST_JFROG: "{{deploy_runtime_image_name_tag_jfrog}}"
+    DST_GITHUB: "{{deploy_runtime_image_name_tag_github}}"
+  script:
     - echo "Deploy to GitHub"
+    - !reference [.fetch-registry-tokens, script]
     - DST=$DST_GITHUB
     - DST_REGISTRY=${DST%%/*}
     - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
