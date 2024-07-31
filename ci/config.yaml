@@ -76,4 +76,3 @@ container_runner:
   rocm: ".container-runner-daint-gpu"
 container_deploy: ".container-runner-lightweight-zen2"
 deploy_runner_image: "quay.io/skopeo/stable:latest"
-  #dummy comment
