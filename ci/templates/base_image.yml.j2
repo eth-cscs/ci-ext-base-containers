@@ -48,6 +48,8 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-jfrog
     - if: $CI_COMMIT_REF_NAME != "main"
       when: manual
       allow_failure: true
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: on_success
   variables:
     SRC: "{{registry_build_image_name_tag}}"
     DST_JFROG: "{{deploy_build_image_name_tag_jfrog}}"
@@ -69,6 +71,8 @@ deploy_job_build_image-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}-githu
     - if: $CI_COMMIT_REF_NAME != "main"
       when: manual
       allow_failure: true
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: on_success
   variables:
     SRC: "{{registry_build_image_name_tag}}"
     DST_JFROG: "{{deploy_build_image_name_tag_jfrog}}"
