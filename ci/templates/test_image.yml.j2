@@ -1,0 +1,47 @@
+##### libtree
+
+build_job_test_image_libtree-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: build_test_image
+  extends:
+    - {{container_builder[arch]}}
+  variables:
+    DOCKERFILE: "test/Dockerfile.libtree"
+    PERSIST_IMAGE_NAME: "{{registry_path}}/test-libtree:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+    DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
+
+test_job_test_image_libtree-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: test_test_image
+  extends:
+    - {{container_runner[arch]}}
+  image: "{{registry_path}}/test-libtree:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  script:
+    - which libtree
+
+##### gromacs
+
+build_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: build_test_image
+  extends:
+    - {{container_builder[arch]}}
+  variables:
+    DOCKERFILE: "test/Dockerfile.gromacs"
+    PERSIST_IMAGE_NAME: "{{registry_path}}/test-gromacs:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+    DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
+
+test_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: test_test_image
+  extends:
+    - {{container_runner[arch]}}
+  image: "{{registry_path}}/test-gromacs:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  script:
+    - which gmx_mpi
+    - gmx_mpi -version
+    {% if arch == "cpu" -%}
+    - gmx_mpi -version | grep "^GPU support:\s\+disabled$"
+    {%- endif %}
+    {% if arch.startswith("cuda") -%}
+    - gmx_mpi -version | grep "^GPU support:\s\+CUDA$"
+    {%- endif %}
+    {% if arch == "rocm" -%}
+    - echo "TODO Lets ignore ROCm for now"
+    {%- endif %}

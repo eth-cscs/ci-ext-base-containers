@@ -1,0 +1,83 @@
+build_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
+  stage: build_base_image
+  extends:
+    - {{container_builder[arch]}}
+  variables:
+    DOCKERFILE: "{{helperdockerfile}}"
+    PERSIST_IMAGE_NAME: "{{build_runtime_image_name_tag[arch]}}"
+    DOCKER_BUILD_ARGS: '{{docker_build_args_helper[arch]}}'
+
+{% if arch == "cuda-aarch64" %}
+# We have multiarch image only for CUDA
+# and we need only one job for CUDA, aarch64 is an arbitrary choice
+create_job_runtime_image_multiarch-{{os}}{{osver}}-{{archstr[arch]}}:
+  stage: create_multiarch_base_image
+  extends: .make-multiarch-image
+  variables:
+    PERSIST_IMAGE_NAME_X86_64: "{{build_runtime_image_name_tag['cuda-x86_64']}}"
+    PERSIST_IMAGE_NAME_AARCH64: "{{build_runtime_image_name_tag['cuda-aarch64']}}"
+    PERSIST_IMAGE_NAME: "{{registry_runtime_image_name_tag}}"
+{% endif %}
+
+test_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}:
+  stage: test_base_image
+  extends:
+    - {{container_runner[arch]}}
+  image: "{{registry_runtime_image_name_tag}}"
+  script:
+    - '[[ $(source /etc/os-release && echo $ID) == "{{os}}" ]]'
+    - '[[ $(source /etc/os-release && echo $VERSION_ID) == "{{osver}}" ]]'
+    {% if arch.startswith("cuda") -%}
+    - 'apt-cache show cuda-libraries-* | grep "Version: {{cudaver}}"'
+    {%- endif %}
+    {% if arch == "rocm" -%}
+    - 'apt-cache show rocm-core | grep "Version: {{rocmver}}."'
+    {%- endif %}
+
+{% if arch != "cuda-x86_64" %}
+# We have multiarch image only for CUDA
+# and we need only one job for CUDA, aarch64 is an arbitrary choice
+deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-jfrog:
+  stage: deploy_base_image
+  extends:
+    - {{container_deploy}}
+  image: {{deploy_runner_image}}
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "main"
+      when: manual
+      allow_failure: true
+  variables:
+    SRC: "{{registry_runtime_image_name_tag}}"
+    DST_JFROG: "{{deploy_runtime_image_name_tag_jfrog}}"
+    DST_GITHUB: "{{deploy_runtime_image_name_tag_github}}"
+  script:
+    - echo "Deploy to JFrog"
+    - !reference [.fetch-registry-tokens, script]
+    - DST=$DST_JFROG
+    - DST_REGISTRY=${DST%%/*}
+    - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${DST_REGISTRY}
+    - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
+
+deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-github:
+  stage: deploy_base_image
+  extends:
+    - {{container_deploy}}
+  image: {{deploy_runner_image}}
+  rules:
+    - if: $CI_COMMIT_REF_NAME != "main"
+      when: manual
+      allow_failure: true
+  variables:
+    SRC: "{{registry_runtime_image_name_tag}}"
+    DST_JFROG: "{{deploy_runtime_image_name_tag_jfrog}}"
+    DST_GITHUB: "{{deploy_runtime_image_name_tag_github}}"
+  script:
+    - echo "Deploy to GitHub"
+    - !reference [.fetch-registry-tokens, script]
+    - DST=$DST_GITHUB
+    - DST_REGISTRY=${DST%%/*}
+    - SRC_REGISTRY=${SRC%%/*}
+    - echo ${CSCS_REGISTRY_PASSWORD} | skopeo login --username ${CSCS_REGISTRY_USER} --password-stdin ${SRC_REGISTRY}
+    - echo ${DEPLOY_GITHUB_PASSWORD} | skopeo login --username ${DEPLOY_GITHUB_USERNAME} --password-stdin ${DST_REGISTRY}
+    - skopeo copy --multi-arch=all "docker://${SRC}" "docker://${DST}"
+{% endif %}

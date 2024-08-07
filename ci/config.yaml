@@ -1,0 +1,78 @@
+# Build versions
+os:
+  ubuntu:
+    - "22.04"
+  #fedora:
+  #  - "39"
+  #  - "40"
+spackver:
+  #- "0.20.3"
+  - "0.21.0"
+cudaver:
+  #- "11.7.1"
+  - "12.4.1"
+rocmver:
+  - "5.6.1"
+  #- "5.7.1"
+
+# Global variables
+registry_path: "$CSCS_REGISTRY_PATH/test/$CI_COMMIT_SHORT_SHA"
+deploy_path_jfrog: "$CSCS_REGISTRY/docker-ci-ext/base-containers/public"
+deploy_path_github: "ghcr.io/eth-cscs/docker-ci-ext/spack-base-containers"
+
+# Template variables
+basedockerfile: "docker/Dockerfile_spack_baseimage_{{os}}{{osver}}"
+helperdockerfile: "docker/Dockerfile_base_helper"
+build_build_image_name_tag:
+  cpu: "{{registry_path}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  cuda-x86_64: "{{registry_path}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr['cuda-x86_64']}}"
+  cuda-aarch64: "{{registry_path}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr['cuda-aarch64']}}"
+  rocm: "{{registry_path}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+registry_build_image_name_tag: "{{registry_path}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_build_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_build_image_name_tag_github: "{{deploy_path_github}}/spack-build:spack{{spackver}}-{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+build_runtime_image_name_tag:
+  cpu: "{{registry_path}}/spack-runtime:{{os}}{{osver}}-{{archstr[arch]}}"
+  cuda-x86_64: "{{registry_path}}/spack-runtime:{{os}}{{osver}}-{{archstr['cuda-x86_64']}}"
+  cuda-aarch64: "{{registry_path}}/spack-runtime:{{os}}{{osver}}-{{archstr['cuda-aarch64']}}"
+  rocm: "{{registry_path}}/spack-runtime:{{os}}{{osver}}-{{archstr[arch]}}"
+registry_runtime_image_name_tag: "{{registry_path}}/spack-runtime:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_runtime_image_name_tag_jfrog: "{{deploy_path_jfrog}}/spack-runtime:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+deploy_runtime_image_name_tag_github: "{{deploy_path_github}}/spack-runtime:{{os}}{{osver}}-{{archstr_deploy[arch]}}"
+baseimg:
+  cpu: "docker.io/{{os}}:{{osver}}"
+  cuda-x86_64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
+  cuda-aarch64: "docker.io/nvidia/cuda:{{cudaver}}-devel-{{os}}{{osver}}"
+  rocm: "docker.io/rocm/dev-{{os}}-{{osver}}:{{rocmver}}-complete"
+archstr:
+  cpu: "cpu"
+  cuda-x86_64: "cuda{{cudaver}}-x86_64"
+  cuda-aarch64: "cuda{{cudaver}}-aarch64"
+  rocm: "rocm{{rocmver}}"
+archstr_deploy:
+  cpu: "cpu"
+  cuda-x86_64: "cuda{{cudaver}}"
+  cuda-aarch64: "cuda{{cudaver}}"
+  rocm: "rocm{{rocmver}}"
+docker_build_args_base:
+  cpu:  '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  cuda-x86_64: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  cuda-aarch64: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}"]'
+  rocm: '["BASEIMG={{baseimg[arch]}}", "SPACK_VER=v{{spackver}}", "ROCM_VERSION={{rocmver}}"]'
+docker_build_args_helper:
+  cpu:  '["BASEIMG={{baseimg[arch]}}"]'
+  cuda-x86_64: '["BASEIMG={{baseimg[arch]}}"]'
+  cuda-aarch64: '["BASEIMG={{baseimg[arch]}}"]'
+  rocm: '["BASEIMG={{baseimg[arch]}}"]'
+container_builder:
+  cpu:  ".container-builder-cscs-zen2"
+  cuda-x86_64: ".container-builder-cscs-zen2"
+  cuda-aarch64: ".container-builder-cscs-gh200"
+  rocm: ".container-builder-cscs-zen2"
+container_runner:
+  cpu:  ".container-runner-eiger-mc-f7t"
+  cuda-x86_64: ".container-runner-daint-gpu"
+  cuda-aarch64: ".container-runner-todi-gh200"
+  rocm: ".container-runner-daint-gpu"
+container_deploy: ".container-runner-lightweight-zen2"
+deploy_runner_image: "quay.io/skopeo/stable:latest"
