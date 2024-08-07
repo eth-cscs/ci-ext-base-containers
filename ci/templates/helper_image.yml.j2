@@ -46,6 +46,8 @@ deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-jfrog:
     - if: $CI_COMMIT_REF_NAME != "main"
       when: manual
       allow_failure: true
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: on_success
   variables:
     SRC: "{{registry_runtime_image_name_tag}}"
     DST_JFROG: "{{deploy_runtime_image_name_tag_jfrog}}"
@@ -67,6 +69,8 @@ deploy_job_runtime_image-{{os}}{{osver}}-{{archstr[arch]}}-github:
     - if: $CI_COMMIT_REF_NAME != "main"
       when: manual
       allow_failure: true
+    - if: $CI_COMMIT_REF_NAME == "main"
+      when: on_success
   variables:
     SRC: "{{registry_runtime_image_name_tag}}"
     DST_JFROG: "{{deploy_runtime_image_name_tag_jfrog}}"
