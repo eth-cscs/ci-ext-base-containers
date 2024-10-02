@@ -1,0 +1,34 @@
+ARG BUILDIMG
+FROM $BUILDIMG as builder
+
+RUN apt-get update \
+  && env DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich apt-get -yqq install --no-install-recommends build-essential
+
+ARG TARGET
+RUN spack-install-helper \
+    "$TARGET"
+
+
+# copy only relevant parts to the final container
+ARG RUNTIMEIMG
+FROM $RUNTIMEIMG
+
+# it is important to keep the paths, otherwise your installation is broken
+# all these paths are created with the above `spack-install-helper` invocation
+COPY --from=builder /opt/spack-environment /opt/spack-environment
+COPY --from=builder /opt/software /opt/software
+COPY --from=builder /opt/._view /opt/._view
+COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
+
+# Some boilerplate to get all paths correctly - fix_spack_install is part of the base image
+# and makes sure that all important things are being correctly setup
+RUN fix_spack_install
+
+RUN apt-get update \
+  && env DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich apt-get -yqq install --no-install-recommends build-essential
+
+# Finally do what we need
+COPY . /src
+
+RUN cd /src \
+ && mpicc mpi_send_recv.c -o mpi_send_recv
