@@ -45,3 +45,26 @@ test_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     {% if arch == "rocm" -%}
     - echo "TODO Lets ignore ROCm for now"
     {%- endif %}
+
+##### mpi_simple
+
+build_job_test_image_mpi_simple-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: build_test_image
+  extends:
+    - {{container_builder[arch]}}
+  variables:
+    DOCKERFILE: "test/mpi_simple/Dockerfile.mpi_simple"
+    PERSIST_IMAGE_NAME: "{{registry_path}}/test-mpi_simple:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+    DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
+
+test_job_test_image_mpi_simple-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+  stage: test_test_image
+  extends:
+    - {{container_runner[arch]}}
+  image: "{{registry_path}}/test-mpi_simple:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  script:
+    - hostname
+    - /src/mpi_send_recv
+  variables:
+    SLURM_JOB_NUM_NODES: 2
+    SLURM_NTASKS: 2
