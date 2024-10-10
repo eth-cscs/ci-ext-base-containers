@@ -6,7 +6,9 @@ RUN apt-get update \
 
 ARG TARGET
 RUN spack-install-helper \
-    "$TARGET"
+    "$TARGET" \
+    osu-micro-benchmarks \
+    bc
 
 
 # copy only relevant parts to the final container
@@ -23,12 +25,3 @@ COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_s
 # Some boilerplate to get all paths correctly - fix_spack_install is part of the base image
 # and makes sure that all important things are being correctly setup
 RUN fix_spack_install
-
-RUN apt-get update \
-  && env DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich apt-get -yqq install --no-install-recommends build-essential
-
-# Finally do what we need
-COPY . /src
-
-RUN cd /src \
- && mpicc mpi_send_recv.c -o mpi_send_recv
