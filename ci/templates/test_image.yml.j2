@@ -46,25 +46,29 @@ test_job_test_image_gromacs-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
     - echo "TODO Lets ignore ROCm for now"
     {%- endif %}
 
-##### mpi_simple
+##### mpi-osu_bw
 
-build_job_test_image_mpi_simple-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+build_job_test_image_mpi-osu_bw-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: build_test_image
   extends:
     - {{container_builder[arch]}}
   variables:
-    DOCKERFILE: "test/mpi_simple/Dockerfile.mpi_simple"
-    PERSIST_IMAGE_NAME: "{{registry_path}}/test-mpi_simple:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+    DOCKERFILE: "test/Dockerfile.mpi-osu_bw"
+    PERSIST_IMAGE_NAME: "{{registry_path}}/test-mpi-osu_bw:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
     DOCKER_BUILD_ARGS: '["BUILDIMG={{registry_build_image_name_tag}}", "RUNTIMEIMG={{registry_runtime_image_name_tag}}", "TARGET={{spack_target}}"]'
 
-test_job_test_image_mpi_simple-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
+test_job_test_image_mpi-osu_bw-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]}}:
   stage: test_test_image
   extends:
     - {{container_runner[arch]}}
-  image: "{{registry_path}}/test-mpi_simple:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
+  image: "{{registry_path}}/test-mpi-osu_bw:spack{{spackver}}-{{os}}{{osver}}-{{archstr[arch]}}"
   script:
-    - hostname
-    - /src/mpi_send_recv
+    - osu_bw | tee osu_bw-out.txt
+    - SIZE=4194304
+    - BW_THRESHOLD=20000
+    - BW=$(awk "/^$SIZE/ {print \$2}" osu_bw-out.txt)
+    - RES=$(bc <<< "$BW > $BW_THRESHOLD")
+    - test $RES -eq 1  # bc: true 1 false 0, bash: true 0 false 1
   variables:
     SLURM_JOB_NUM_NODES: 2
     SLURM_NTASKS: 2
