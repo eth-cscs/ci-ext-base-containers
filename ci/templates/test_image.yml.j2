@@ -67,7 +67,7 @@ test_job_test_image_mpi-osu_bw-{{os}}{{osver}}-spack{{spackver}}-{{archstr[arch]
     - SIZE=4194304
     - BW_THRESHOLD=20000
     - BW=$(awk "/^$SIZE/ {print \$2}" osu_bw-out.txt)
-    - RES=$(bc <<< "$BW > $BW_THRESHOLD")
+    - RES=$(bc <<< "$BW > $BW_THRESHOLD")  # use bc because bash cannot compare floating poing numbers
     - test $RES -eq 1  # bc: true 1 false 0, bash: true 0 false 1
   variables:
     SLURM_JOB_NUM_NODES: 2
