@@ -15,7 +15,23 @@ do
     spack repo add "${repo}"
 done
 
-spack -e . gpg trust /tmp/spack_sign_key.gpg || echo 'Warning: Could not add spack sign key, i.e. your packages cannot be added to the buildcache'
+# TODO: Remove the Spack version check when we decide to dicsontinue support for older versions
+SPACK_VER=`spack --version`
+IFS="." read SPACK_MAJOR SPACK_MINOR SPACK_PATCH <<< $SPACK_VER
+
+# GPG key is available (we are running in the CI pipeline) => we can push into the buildcache
+if [ -f /tmp/spack_sign_key.gpg ];
+then
+    spack -e . gpg trust /tmp/spack_sign_key.gpg
+
+    # Spack 0.22+ has autopush mirrors
+    if [ $SPACK_MINOR -ge 22 ]
+    then
+        spack mirror set --autopush s3_cscs_buildcache
+    fi
+else
+    echo 'Warning: Could not add spack sign key, i.e. your packages cannot be added to the buildcache'
+fi
 
 spack -e . concretize
 
@@ -24,7 +40,13 @@ if [ ${#SPECS_ONLY_DEPENDENCIES[@]} -ne 0 ]; then
     printf '%s\n' "${SPECS_ONLY_DEPENDENCIES[@]}" | jq --raw-input . | jq --slurp --compact-output . > only-dependencies.json
 fi
 
-spack -e . env depfile | spack-modify-makefile-push-buildcache > Makefile
+# Spack 0.22+ has autopush mirrors, no modification of Makefile is needed
+if [ $SPACK_MINOR -ge 22 ]
+then
+    spack -e . env depfile > Makefile
+else
+    spack -e . env depfile | spack-modify-makefile-push-buildcache > Makefile
+fi
 make -j$NUM_PROCS SPACK_COLOR=always --output-sync=recurse
 
 # Do garbage collection only when there are no packages with --only-dependencies
