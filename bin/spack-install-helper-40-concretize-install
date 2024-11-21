@@ -20,7 +20,7 @@ SPACK_VER=`spack --version`
 IFS="." read SPACK_MAJOR SPACK_MINOR SPACK_PATCH <<< $SPACK_VER
 
 # GPG key is available (we are running in the CI pipeline) => we can push into the buildcache
-if [ -f /tmp/spack_sign_key.gpg ];
+if [ -s /tmp/spack_sign_key.gpg ];
 then
     spack -e . gpg trust /tmp/spack_sign_key.gpg
 
