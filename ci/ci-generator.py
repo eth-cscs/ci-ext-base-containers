@@ -84,13 +84,13 @@ stages:
   - deploy_base_image"""
 )
 
-templates = [{"template_file": 'ci/templates/base_image.yml.j2',
+templates = [{"template_file": 'ci/templates/build_image.yml.j2',
               "os_dict": config["os"],
               "spackver_list": config["spackver"],
               "cudaver_list": config["cudaver"],
               "rocmver_list": config["rocmver"],
              },
-             {"template_file": 'ci/templates/helper_image.yml.j2',
+             {"template_file": 'ci/templates/runtime_image.yml.j2',
               "os_dict": config["os"],
               "spackver_list": [None],
               "cudaver_list": config["cudaver"],
