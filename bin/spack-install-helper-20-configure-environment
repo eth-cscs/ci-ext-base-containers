@@ -10,7 +10,7 @@ packages:
   all:
     require: target=$TARGET
   mpi:
-    require: 'mpich@3.1.4 netmod=tcp device=ch3'
+    require: 'mpich@4.1.2 netmod=ofi device=ch4'
 EOF
 
 env DEFAULT_VARIANTS="$DEFAULT_VARIANTS" \
