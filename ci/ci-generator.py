@@ -62,9 +62,9 @@ def generate_template(template_file, os_dict, spackver_list, cudaver_list, rocmv
                     target = "cuda-aarch64"
                     pipeline.append(generate_job(template, os, osver, spackver, target, cudaver, None))
 
-                for rocmver in rocmver_list:
-                    target = "rocm"
-                    pipeline.append(generate_job(template, os, osver, spackver, target, None, rocmver))
+                #for rocmver in rocmver_list:
+                #    target = "rocm"
+                #    pipeline.append(generate_job(template, os, osver, spackver, target, None, rocmver))
 
     return pipeline
 

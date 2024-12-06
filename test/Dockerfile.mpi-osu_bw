@@ -1,0 +1,35 @@
+ARG BUILDIMG
+FROM $BUILDIMG as builder
+
+RUN apt-get update \
+  && env DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich apt-get -yqq install --no-install-recommends build-essential
+
+# Fix error in ./configure: cannot link with -lcuda
+RUN TARGET=/usr/local/cuda/lib64/stubs/libcuda.so; \
+    LINK_NAME=/usr/local/cuda/lib64/libcuda.so; \
+    if test -f $TARGET && test ! -f $LINK_NAME; \
+    then \
+      ln -s $TARGET $LINK_NAME; \
+    fi
+
+ARG TARGET
+RUN spack-install-helper \
+    "$TARGET" \
+    osu-micro-benchmarks \
+    bc
+
+
+# copy only relevant parts to the final container
+ARG RUNTIMEIMG
+FROM $RUNTIMEIMG
+
+# it is important to keep the paths, otherwise your installation is broken
+# all these paths are created with the above `spack-install-helper` invocation
+COPY --from=builder /opt/spack-environment /opt/spack-environment
+COPY --from=builder /opt/software /opt/software
+COPY --from=builder /opt/._view /opt/._view
+COPY --from=builder /etc/profile.d/z10_spack_environment.sh /etc/profile.d/z10_spack_environment.sh
+
+# Some boilerplate to get all paths correctly - fix_spack_install is part of the base image
+# and makes sure that all important things are being correctly setup
+RUN fix_spack_install
